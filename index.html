@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مصاريفي</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#12161A">
+<style>
+  :root{
+    --bg: #12161A;
+    --surface: #1B2027;
+    --surface-2: #232A32;
+    --text: #EDEAE2;
+    --text-dim: #8C949E;
+    --accent: #8FB39A;
+    --accent-dim: #5E7A69;
+    --danger: #C77B6B;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
+    min-height:100vh;
+    padding-bottom:40px;
+  }
+  header{
+    padding:28px 20px 18px;
+    text-align:center;
+    border-bottom:1px solid var(--surface-2);
+  }
+  header h1{
+    margin:0;
+    font-size:22px;
+    letter-spacing:0.5px;
+    font-weight:700;
+  }
+  header p{
+    margin:6px 0 0;
+    color:var(--text-dim);
+    font-size:13px;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:20px;}
+  .card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    padding:18px;
+    margin-bottom:16px;
+  }
+  label{
+    display:block;
+    font-size:13px;
+    color:var(--text-dim);
+    margin-bottom:6px;
+  }
+  input[type=text], input[type=number], select{
+    width:100%;
+    padding:13px 14px;
+    border-radius:10px;
+    border:1px solid var(--surface-2);
+    background:var(--surface-2);
+    color:var(--text);
+    font-size:16px;
+    margin-bottom:14px;
+    font-family:inherit;
+  }
+  input:focus, select:focus{
+    outline:none;
+    border-color:var(--accent-dim);
+  }
+  .type-toggle{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .type-toggle button{
+    flex:1;
+    padding:11px;
+    border-radius:10px;
+    border:1px solid var(--surface-2);
+    background:var(--surface-2);
+    color:var(--text-dim);
+    font-size:14px;
+    cursor:pointer;
+  }
+  .type-toggle button.active{
+    background:var(--accent-dim);
+    color:var(--text);
+    border-color:var(--accent-dim);
+  }
+  .cat-guess{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:var(--accent);
+    margin:-6px 0 14px;
+    min-height:18px;
+  }
+  button.submit{
+    width:100%;
+    padding:15px;
+    border-radius:10px;
+    border:none;
+    background:var(--accent);
+    color:#12161A;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  button.submit:active{opacity:0.85;}
+  button.submit:disabled{opacity:0.5;}
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--surface-2);
+    color:var(--text);
+    padding:12px 20px;
+    border-radius:10px;
+    font-size:14px;
+    opacity:0;
+    transition:all 0.25s ease;
+    pointer-events:none;
+    border:1px solid var(--accent-dim);
+    white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .recent{margin-top:4px;}
+  .recent h2{
+    font-size:13px;
+    color:var(--text-dim);
+    font-weight:600;
+    margin:0 0 10px;
+  }
+  .row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid var(--surface-2);
+    font-size:14px;
+  }
+  .row:last-child{border-bottom:none;}
+  .row .item{font-weight:600;}
+  .row .cat{color:var(--text-dim);font-size:12px;}
+  .row .amt{font-weight:700;color:var(--accent);}
+  .settings-btn{
+    position:fixed;
+    top:16px;
+    left:16px;
+    background:var(--surface);
+    border:1px solid var(--surface-2);
+    color:var(--text-dim);
+    width:38px;height:38px;
+    border-radius:50%;
+    font-size:16px;
+    cursor:pointer;
+  }
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,0.6);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:50;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{
+    background:var(--surface);
+    border-radius:var(--radius);
+    padding:20px;
+    max-width:420px;
+    width:100%;
+  }
+  .modal h3{margin-top:0;font-size:15px;}
+  .modal p{color:var(--text-dim);font-size:12.5px;line-height:1.6;}
+  .modal-actions{display:flex;gap:8px;margin-top:10px;}
+  .modal-actions button{
+    flex:1;padding:11px;border-radius:10px;border:none;
+    font-size:14px;cursor:pointer;
+  }
+  .modal-actions .save{background:var(--accent);color:#12161A;font-weight:700;}
+  .modal-actions .cancel{background:var(--surface-2);color:var(--text);}
+  .sheet-link{
+    display:block;
+    text-align:center;
+    color:var(--accent);
+    font-size:13px;
+    margin-top:14px;
+    text-decoration:none;
+  }
+</style>
+</head>
+<body>
+
+<button class="settings-btn" onclick="openSettings()">⚙︎</button>
+
+<header>
+  <h1>مصاريفي</h1>
+  <p>سجّل أي حاجة تشتريها في ثانية</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <label for="item">اسم الحاجة اللي اشتريتها</label>
+    <input type="text" id="item" placeholder="مثلاً: كيلو لحمة، ازازة لبن..." autocomplete="off">
+
+    <div class="cat-guess" id="catGuess"></div>
+
+    <label for="category">البند</label>
+    <select id="category"></select>
+
+    <label for="amount">المبلغ (جنيه)</label>
+    <input type="number" id="amount" placeholder="0" inputmode="decimal">
+
+    <label>نوع المصروف</label>
+    <div class="type-toggle">
+      <button type="button" id="typeVariable" class="active" onclick="setType('متغير')">متغيّر</button>
+      <button type="button" id="typeFixed" onclick="setType('ثابت')">ثابت</button>
+    </div>
+
+    <button class="submit" id="submitBtn" onclick="submitExpense()">إضافة</button>
+  </div>
+
+  <div class="card recent">
+    <h2>آخر الحركات (على الجهاز ده)</h2>
+    <div id="recentList"></div>
+    <a class="sheet-link" id="sheetLink" href="#" target="_blank" style="display:none;">افتح الشيت ↗</a>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h3>الإعدادات</h3>
+    <p>حط هنا رابط الـ Web App اللي هتاخده من Google Apps Script بعد الـ Deploy. الرابط ده بيتخزن على جهازك بس.</p>
+    <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+    <p style="margin-top:16px;">رابط الشيت نفسه (اختياري، عشان تفتحه بسرعة من هنا)</p>
+    <input type="text" id="sheetUrlInput" placeholder="https://docs.google.com/spreadsheets/d/...">
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeSettings()">إلغاء</button>
+      <button class="save" onclick="saveSettings()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_CATEGORIES = ["لحوم","بقالة","خضار وفاكهة","مواصلات","فواتير","إيجار","ترفيه","صحة","تعليم","أخرى"];
+
+const DEFAULT_KEYWORDS = {
+  "لحمة":"لحوم","لحم":"لحوم","فراخ":"لحوم","فرخة":"لحوم","كفتة":"لحوم","كباب":"لحوم","سمك":"لحوم","بط":"لحوم",
+  "لبن":"بقالة","جبنة":"بقالة","زبدة":"بقالة","زيت":"بقالة","رز":"بقالة","سكر":"بقالة","شاي":"بقالة","مكرونة":"بقالة","عيش":"بقالة","بيض":"بقالة",
+  "خضار":"خضار وفاكهة","فاكهة":"خضار وفاكهة","طماطم":"خضار وفاكهة","بطاطس":"خضار وفاكهة","موز":"خضار وفاكهة","تفاح":"خضار وفاكهة",
+  "بنزين":"مواصلات","تاكسي":"مواصلات","اوبر":"مواصلات","اوتوبيس":"مواصلات","مترو":"مواصلات",
+  "كهرباء":"فواتير","غاز":"فواتير","مياه":"فواتير","نت":"فواتير","انترنت":"فواتير","موبايل":"فواتير",
+  "ايجار":"إيجار","إيجار":"إيجار",
+  "سينما":"ترفيه","مطعم":"ترفيه","كافيه":"ترفيه","قهوة":"ترفيه",
+  "دوا":"صحة","دواء":"صحة","دكتور":"صحة","صيدلية":"صحة",
+  "مدرسة":"تعليم","كتب":"تعليم","كورس":"تعليم"
+};
+
+function loadKeywords(){
+  const stored = localStorage.getItem("keywords");
+  return stored ? {...DEFAULT_KEYWORDS, ...JSON.parse(stored)} : {...DEFAULT_KEYWORDS};
+}
+function saveKeyword(word, category){
+  const custom = JSON.parse(localStorage.getItem("keywords") || "{}");
+  custom[word.trim()] = category;
+  localStorage.setItem("keywords", JSON.stringify(custom));
+}
+
+let currentType = "متغير";
+let guessedCategory = null;
+
+function setType(t){
+  currentType = t;
+  document.getElementById("typeVariable").classList.toggle("active", t==="متغير");
+  document.getElementById("typeFixed").classList.toggle("active", t==="ثابت");
+}
+
+function populateCategories(){
+  const select = document.getElementById("category");
+  select.innerHTML = "";
+  DEFAULT_CATEGORIES.forEach(c=>{
+    const opt = document.createElement("option");
+    opt.value = c; opt.textContent = c;
+    select.appendChild(opt);
+  });
+}
+
+function guessCategory(text){
+  const keywords = loadKeywords();
+  const clean = text.trim();
+  if(!clean) return null;
+  for(const word in keywords){
+    if(clean.includes(word)) return keywords[word];
+  }
+  return null;
+}
+
+document.getElementById("item").addEventListener("input", (e)=>{
+  const guess = guessCategory(e.target.value);
+  const guessEl = document.getElementById("catGuess");
+  if(guess){
+    guessedCategory = guess;
+    document.getElementById("category").value = guess;
+    guessEl.textContent = "✓ اتحطت تلقائي في بند: " + guess;
+  } else {
+    guessedCategory = null;
+    guessEl.textContent = e.target.value.trim() ? "مش عارف البند، اختاره يدوي وهتفتكر المرة الجاية" : "";
+  }
+});
+
+function getScriptUrl(){ return localStorage.getItem("scriptUrl") || ""; }
+function getSheetUrl(){ return localStorage.getItem("sheetUrl") || ""; }
+
+function openSettings(){
+  document.getElementById("scriptUrlInput").value = getScriptUrl();
+  document.getElementById("sheetUrlInput").value = getSheetUrl();
+  document.getElementById("settingsModal").classList.add("show");
+}
+function closeSettings(){ document.getElementById("settingsModal").classList.remove("show"); }
+function saveSettings(){
+  localStorage.setItem("scriptUrl", document.getElementById("scriptUrlInput").value.trim());
+  localStorage.setItem("sheetUrl", document.getElementById("sheetUrlInput").value.trim());
+  closeSettings();
+  renderSheetLink();
+  showToast("اتحفظ ✓");
+}
+function renderSheetLink(){
+  const link = document.getElementById("sheetLink");
+  const url = getSheetUrl();
+  if(url){ link.href = url; link.style.display = "block"; }
+  else{ link.style.display = "none"; }
+}
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2200);
+}
+
+function getRecent(){ return JSON.parse(localStorage.getItem("recent") || "[]"); }
+function renderRecent(){
+  const list = getRecent();
+  const el = document.getElementById("recentList");
+  if(list.length === 0){
+    el.innerHTML = '<div style="color:var(--text-dim);font-size:13px;">لسه مفيش حاجة متسجلة</div>';
+    return;
+  }
+  el.innerHTML = list.slice(0,10).map(r => `
+    <div class="row">
+      <div>
+        <div class="item">${r.item}</div>
+        <div class="cat">${r.category} · ${r.type}</div>
+      </div>
+      <div class="amt">${r.amount} ج</div>
+    </div>
+  `).join("");
+}
+
+async function submitExpense(){
+  const item = document.getElementById("item").value.trim();
+  const amount = document.getElementById("amount").value;
+  const category = document.getElementById("category").value;
+  const scriptUrl = getScriptUrl();
+
+  if(!item || !amount){
+    showToast("اكتب اسم الحاجة والمبلغ");
+    return;
+  }
+  if(!scriptUrl){
+    showToast("سجّل رابط الـ Apps Script الأول من ⚙︎");
+    openSettings();
+    return;
+  }
+
+  // learn: if the guess didn't match what the user picked, remember the correction
+  const guess = guessCategory(item);
+  if(guess !== category){
+    const words = item.split(/\s+/).filter(w => w.length > 1);
+    words.forEach(w => saveKeyword(w, category));
+  }
+
+  const payload = { item, amount, category, type: currentType, date: new Date().toISOString() };
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "بتتسجل...";
+
+  try{
+    await fetch(scriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+
+    const recent = getRecent();
+    recent.unshift(payload);
+    localStorage.setItem("recent", JSON.stringify(recent.slice(0,30)));
+
+    document.getElementById("item").value = "";
+    document.getElementById("amount").value = "";
+    document.getElementById("catGuess").textContent = "";
+    setType("متغير");
+    renderRecent();
+    showToast("اتسجلت ✓");
+  }catch(err){
+    showToast("حصل خطأ، جرب تاني");
+  }finally{
+    btn.disabled = false;
+    btn.textContent = "إضافة";
+  }
+}
+
+populateCategories();
+renderRecent();
+renderSheetLink();
+if(!getScriptUrl()){
+  setTimeout(openSettings, 400);
+}
+</script>
+</body>
+</html>
