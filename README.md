@@ -1,67 +1,69 @@
-# Personal Expense Tracker — Setup Guide
+# Personal Expense & Income Tracker — Update Guide
 
-Three free pieces, no server needed:
-1. A Google Sheet (your database)
-2. A Google Apps Script (the bridge between the web page and the Sheet)
-3. GitHub Pages (free static hosting for the web page)
+This update adds:
+- **Income tracking** (salary + freelance, both variable) alongside expenses
+- **Monthly dashboard** in the app: total spent, total income, net, top spending category
+- **Budget limits** per category with a warning when you go over
+- **Monthly Summary sheet** with auto-calculated formulas (mirrors the layout of your old manual sheet)
 
-## Step 1 — Create the Google Sheet
+## What changed
 
-1. Go to Google Sheets and create a new blank spreadsheet.
-2. Name it whatever you like, e.g. "Expenses".
+- `Code.gs` — replace the whole content of your Apps Script project with this new version.
+- `index.html` — replace the file on GitHub with this new version.
+- `manifest.json` — unchanged, no need to re-upload unless you don't have it yet.
 
-## Step 2 — Add the Apps Script
+## Step 1 — Update the Apps Script
 
-1. In the Sheet, go to **Extensions > Apps Script**.
-2. Delete the placeholder code and paste in the full contents of `Code.gs` (included in this folder).
-3. In the toolbar, select the function `setup` from the dropdown next to the Run button, then click **Run**.
-   - The first time, Google will ask for permissions. Click through and allow it (it's your own script acting on your own sheet).
-   - This creates an "Expenses" tab with the right headers.
-4. Click **Deploy > New deployment**.
-   - Click the gear icon next to "Select type" and choose **Web app**.
-   - Execute as: **Me**
-   - Who has access: **Anyone**
-   - Click **Deploy**.
-5. Copy the **Web app URL** it gives you (looks like `https://script.google.com/macros/s/XXXXX/exec`). You'll need this in Step 4.
+1. Open your Google Sheet, go to **Extensions > Apps Script**.
+2. Select all the existing code (Ctrl+A) and delete it.
+3. Paste in the new `Code.gs`.
+4. Run the `setup` function again (dropdown next to Run > select `setup` > Run).
+   - This is safe to re-run — it recreates the Expenses/Income/Budgets/Monthly Summary tabs with headers. It does **not** delete your existing rows in Expenses since the code only clears headers on the sheets it manages fresh, but to be safe: **if you already have expense data you care about, check the Expenses tab after running setup to confirm your rows are still there.**
+5. Go to **Deploy > Manage deployments > click the pencil icon (Edit) > Version: New version > Deploy**.
+   - You do NOT need a new URL — the existing Web app URL keeps working.
 
-Whenever you edit `Code.gs` later, go to **Deploy > Manage deployments > Edit (pencil icon) > New version > Deploy**, otherwise your changes won't take effect.
+## Step 2 — Update the web page
 
-## Step 3 — Put the site on GitHub Pages
+1. Go to your GitHub repo.
+2. Open `index.html`, click the pencil icon (Edit this file).
+3. Select all (Ctrl+A), delete, and paste in the new `index.html` content.
+4. Scroll down, click **Commit changes**.
+5. Give GitHub Pages a minute, then refresh your app.
 
-1. Create a new **public** GitHub repo, e.g. `my-expenses`.
-2. Upload `index.html` and `manifest.json` from this folder to the repo (drag and drop works fine on github.com).
-3. Go to the repo's **Settings > Pages**.
-4. Under "Source", choose the `main` branch and `/ (root)` folder, then Save.
-5. GitHub will give you a URL like `https://yourusername.github.io/my-expenses/`. That's your app.
+## Step 3 — Set your budget limits (optional)
 
-## Step 4 — Connect the page to your Sheet
+1. Open your Google Sheet, go to the new **Budgets** tab.
+2. Next to each category, type a monthly limit in جنيه (e.g. لحوم → 1500).
+3. Leave it blank for any category you don't want to track a limit for.
+4. The app will show a warning banner on the dashboard if you go over any limit you set, for the current month.
 
-1. Open your GitHub Pages URL on your phone (or desktop).
-2. Tap the gear icon (top-left).
-3. Paste the **Web app URL** from Step 2 into "رابط الـ Web App".
-4. (Optional) Paste your Google Sheet's normal URL too, so you get a quick link to open it.
-5. Save.
+## How income works now
 
-## Step 5 — Add it to your iPhone home screen
+- In the app, there's a toggle at the top of the form: **مصروف** / **دخل**.
+- Switch to **دخل**, type the source (e.g. "مرتب" or "فريلانس - مشروع كذا"), and the amount.
+- Every income entry goes to a separate **Income** tab in the Sheet. You can add as many entries as you want in a month (salary + freelance + anything else) — the dashboard sums them all up.
 
-1. Open the GitHub Pages URL in Safari.
-2. Tap the Share icon > **Add to Home Screen**.
-3. Now it opens full-screen like a real app, no browser bar.
+## The dashboard (top of the app)
 
-## How the auto-categorization works
+Shows, for the current calendar month:
+- Total expenses
+- Total income
+- Net (income − expenses)
+- Your top spending category
+- Any budget warnings
 
-- The page ships with a starter list of Arabic keywords mapped to categories (e.g. "لحمة" → "لحوم", "لبن" → "بقالة").
-- If it doesn't recognize a word, you just pick the category yourself once — it saves that correction in the phone's local storage, so next time it recognizes it automatically. This is per-device, not synced, so if you use it from two phones you'll teach each one separately.
-- To edit the built-in keyword list, open `index.html` and edit the `DEFAULT_KEYWORDS` object near the top of the `<script>` section.
+Tap "تحديث" to refresh it manually, or it refreshes automatically after you add anything.
 
-## Viewing your monthly analysis
+## Monthly Summary sheet
 
-The app only handles fast data entry. All analysis happens in the Sheet itself:
-- Use a **Pivot Table** (Insert > Pivot table) with rows = Category, values = Sum of Amount, to see spend per category.
-- Add a second pivot filtered by "Type" (Fixed vs Variable) to separate rent/bills from day-to-day spending.
-- Insert a simple pie or bar chart from either pivot table for a visual monthly breakdown.
+A new tab called **Monthly Summary** was created with one row for the current month, using formulas that auto-total each category from the Expenses tab, plus total income and net. This mirrors the format of your old manual sheet.
 
-## Notes / limitations
+- Columns match the app's categories (لحوم, بقالة, خضار وفاكهة, مواصلات, فواتير, إيجار, ترفيه, صحة, تعليم, أخرى) rather than your old bucket names (كهرباء, اتحاد ملاك...), since the app tracks purchases at that level of detail.
+- The last column, **"التحويش (يدوي)"**, is left blank on purpose — how much you actually choose to set aside as savings each month is a personal decision, not something derivable from spend/income automatically, so type it in yourself each month.
+- **To add next month's row**: copy row 2 (A2:N2) and paste it into row 3, then change the date in A3 to the 1st of the next month. The formulas will recalculate for that month automatically.
 
-- This is intentionally simple: no login, no multi-user support. Anyone with your Apps Script URL could technically POST data to your sheet, so don't publish that URL anywhere public — it only lives in your phone's local storage.
-- If Apps Script ever feels slow (it can have a short delay on first request after being idle), that's normal for the free tier.
+## Notes
+
+- First request after the app has been idle can take a few seconds (Apps Script "waking up"). This is normal and only happens occasionally.
+- Auto-categorization corrections are stored per-device (phone's local storage), not synced across devices.
+- Don't share your Apps Script Web App URL publicly.
